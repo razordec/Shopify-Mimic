@@ -1,0 +1,24 @@
+{% liquid
+  assign hero_alt = section.settings.background_image.alt | default: section.settings.heading | escape
+%}
+<section id="Hero-{{ section.id }}" class="hb" data-section-id="{{ section.id }}" style="--hb-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }}; --hb-min-height: {% case section.settings.height %}{% when 'small' %}32rem{% when 'full' %}100svh{% else %}48rem{% endcase %}; --hb-text: #ffffff; --hb-overlay-color: #000000;">
+  <div class="hb__media">
+    {% if section.settings.background_image != blank %}
+      {{ section.settings.background_image | image_url: width: 2400 | image_tag: widths: '750, 1100, 1500, 2000, 2400', sizes: '100vw', loading: 'eager', fetchpriority: 'high', decoding: 'async', alt: hero_alt }}
+    {% else %}<div class="hb__placeholder" aria-hidden="true"></div>{% endif %}
+  </div>
+  <div class="hb__shade" aria-hidden="true"></div>
+  <div class="hb__content page-width">
+    {% if section.settings.heading != blank %}<h1>{{ section.settings.heading | escape }}</h1>{% endif %}
+    {% if section.settings.subheading != blank %}<div class="hb__sub">{{ section.settings.subheading }}</div>{% endif %}
+    {% if section.settings.cta_label != blank and section.settings.cta_url != blank %}<a class="hb__cta" href="{{ section.settings.cta_url }}">{{ section.settings.cta_label | escape }}</a>{% endif %}
+  </div>
+</section>
+<style>
+#Hero-{{ section.id }}{--hb-gap:clamp(1rem,3vw,2rem);position:relative;display:grid;align-items:center;min-height:var(--hb-min-height);overflow:hidden;color:var(--hb-text);background:#222}
+#Hero-{{ section.id }} .hb__media,#Hero-{{ section.id }} .hb__shade{position:absolute;inset:0}#Hero-{{ section.id }} .hb__media img{width:100%;height:100%;object-fit:cover}#Hero-{{ section.id }} .hb__placeholder{width:100%;height:100%;background:#555}#Hero-{{ section.id }} .hb__shade{background:var(--hb-overlay-color);opacity:var(--hb-overlay)}#Hero-{{ section.id }} .hb__content{position:relative;z-index:1;padding-block:4rem;max-width:var(--page-width,120rem)}#Hero-{{ section.id }} h1{max-width:18ch;font-size:clamp(2.25rem,6vw,5.5rem);line-height:1.05;margin:0 0 var(--hb-gap)}#Hero-{{ section.id }} .hb__sub{max-width:58ch;font-size:clamp(1rem,2vw,1.25rem)}#Hero-{{ section.id }} .hb__cta{display:inline-block;margin-top:var(--hb-gap);padding:1rem 1.5rem;background:var(--hb-text);color:#111;text-decoration:none;font-weight:700}#Hero-{{ section.id }} :focus-visible{outline:3px solid currentColor;outline-offset:4px}
+@media(prefers-reduced-motion:no-preference){#Hero-{{ section.id }} .hb__cta{transition:transform .2s}#Hero-{{ section.id }} .hb__cta:hover{transform:translateY(-2px)}}
+</style>
+{% schema %}
+{"name":"Hero banner","tag":"section","class":"section-hero-banner","settings":[{"type":"text","id":"heading","label":"Heading","default":"Welcome to our store"},{"type":"richtext","id":"subheading","label":"Subheading","default":"<p>Discover something you'll love.</p>"},{"type":"image_picker","id":"background_image","label":"Background image"},{"type":"text","id":"cta_label","label":"Button label","default":"Shop now"},{"type":"url","id":"cta_url","label":"Button link"},{"type":"range","id":"overlay_opacity","label":"Black overlay opacity (minimum ensures 4.5:1 contrast with white text)","min":70,"max":95,"step":5,"unit":"%","default":75,"info":"A solid black overlay is enforced and opacity cannot go below 70%, maintaining a minimum 4.5:1 white-text contrast ratio over even white image pixels."},{"type":"select","id":"height","label":"Height","options":[{"value":"small","label":"Small"},{"value":"medium","label":"Medium"},{"value":"full","label":"Full viewport"}],"default":"medium"}],"max_blocks":0,"presets":[{"name":"Hero banner"}]}
+{% endschema %}

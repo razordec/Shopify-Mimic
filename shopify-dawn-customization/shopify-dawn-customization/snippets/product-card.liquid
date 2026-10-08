@@ -1,0 +1,12 @@
+{% if product != blank %}
+<article class="custom-card" data-product-card>
+  <a class="custom-card__media" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+    {% if product.featured_image %}{{ product.featured_image | image_url: width: 720 | image_tag: widths: '240, 360, 540, 720', sizes: '(min-width: 990px) 25vw, (min-width: 750px) 50vw, 100vw', loading: 'lazy', decoding: 'async', alt: product.featured_image.alt | default: product.title, width: product.featured_image.width, height: product.featured_image.height }}{% else %}<span class="custom-card__placeholder" aria-hidden="true"></span>{% endif %}
+    {% if product.compare_at_price > product.price %}<span class="custom-card__badge">{{ 'products.product.on_sale' | t | default: 'Sale' }}</span>{% endif %}
+  </a>
+  <div class="custom-card__info"><h3><a href="{{ product.url }}">{{ product.title | escape }}</a></h3>
+    <div class="custom-card__price">{% if product.compare_at_price > product.price %}<s>{{ product.compare_at_price | money }}</s> <span>{{ product.price | money }}</span>{% else %}<span>{{ product.price | money }}</span>{% endif %}</div>
+    {% if quick_add and product.available %}{% assign card_form_id = 'QuickAdd-' | append: section.id | append: '-' | append: product.id %}<form method="post" action="{{ routes.cart_add_url }}" id="{{ card_form_id }}"><input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}"><input type="hidden" name="quantity" value="1"><button type="submit" class="custom-card__quick" aria-label="{{ 'products.product.add_to_cart' | t | default: 'Add to cart' }}: {{ product.title | escape }}">{{ 'products.product.add_to_cart' | t | default: 'Quick add' }}</button></form>{% endif %}
+  </div>
+</article>
+{% endif %}

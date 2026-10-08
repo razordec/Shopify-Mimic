@@ -1,0 +1,14 @@
+{{ 'custom-theme.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'custom-theme.js' | asset_url }}" defer="defer"></script>
+<div class="cart-drawer" data-cart-drawer data-section-id="{{ section.id }}" data-threshold="{{ section.settings.free_shipping_threshold | times: 100 }}" hidden aria-hidden="true">
+  <button class="cart-drawer__scrim" type="button" data-cart-close aria-label="Close cart"></button>
+  <aside class="cart-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="CartDrawerTitle-{{ section.id }}" tabindex="-1">
+    <header><h2 id="CartDrawerTitle-{{ section.id }}">{{ 'sections.cart.title' | t | default: 'Your cart' }}</h2><button type="button" data-cart-close aria-label="Close cart">×</button></header>
+    {% if section.settings.free_shipping_threshold > 0 %}<div class="cart-drawer__shipping" data-shipping-progress role="status"><p data-shipping-message></p><progress max="100" value="0" aria-label="Free shipping progress"></progress></div>{% endif %}
+    <div data-cart-lines>{% if cart.item_count == 0 %}<p>{{ 'sections.cart.empty' | t | default: 'Your cart is empty.' }}</p>{% else %}{% for item in cart.items %}<article class="cart-line" data-line="{{ forloop.index }}"><a href="{{ item.url }}">{{ item.image | image_url: width: 160 | image_tag: loading: 'lazy', decoding: 'async', alt: item.title }}</a><div><a href="{{ item.url }}">{{ item.product.title | escape }}{% unless item.variant.title == 'Default Title' %} — {{ item.variant.title | escape }}{% endunless %}</a><p>{{ item.final_line_price | money }}</p><div class="cart-line__qty"><button type="button" data-qty-change="-1" aria-label="Decrease quantity of {{ item.product.title | escape }}">−</button><input type="number" min="0" value="{{ item.quantity }}" data-qty aria-label="Quantity of {{ item.product.title | escape }}"><button type="button" data-qty-change="1" aria-label="Increase quantity of {{ item.product.title | escape }}">+</button></div></div></article>{% endfor %}{% endif %}</div>
+    <footer><p>{{ 'sections.cart.subtotal' | t | default: 'Subtotal' }} <strong data-cart-subtotal>{{ cart.total_price | money }}</strong></p><a class="button" href="{{ routes.cart_url }}">{{ 'sections.cart.view_cart' | t | default: 'View cart' }}</a><a class="button" href="{{ routes.checkout_url }}">{{ 'sections.cart.checkout' | t | default: 'Checkout' }}</a></footer>
+  </aside>
+</div>
+{% schema %}
+{"name":"Cart drawer","tag":"section","class":"section-cart-drawer","settings":[{"type":"range","id":"free_shipping_threshold","label":"Free-shipping threshold","min":0,"max":500,"step":10,"unit":"$","default":75,"info":"Set to zero to hide the progress indicator. Threshold is in the store's currency."}],"max_blocks":0}
+{% endschema %}

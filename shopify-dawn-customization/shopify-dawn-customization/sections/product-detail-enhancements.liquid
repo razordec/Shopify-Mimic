@@ -1,0 +1,23 @@
+{{ 'custom-theme.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'custom-theme.js' | asset_url }}" defer="defer"></script>
+{% assign current_variant = product.selected_or_first_available_variant %}
+<section class="pde page-width" data-product-enhancements data-section-id="{{ section.id }}">
+  {% if product == blank %}<p>This section is available on product pages.</p>{% else %}
+    <div class="pde__main">
+      {% if section.settings.show_image and product.featured_image %}<div class="pde__image">{{ product.featured_image | image_url: width: 1200 | image_tag: widths: '480, 720, 960, 1200', sizes: '(min-width: 990px) 50vw, 100vw', loading: 'lazy', decoding: 'async', alt: product.featured_image.alt | default: product.title }}</div>{% endif %}
+      <div class="pde__info"><h1>{{ product.title | escape }}</h1><div class="pde__price" data-current-price>{{ current_variant.price | money }}</div>
+        {% form 'product', product, id: 'ProductForm-' | append: section.id, class: 'pde__form' %}
+          {% unless product.has_only_default_variant %}<label for="Variant-{{ section.id }}">{{ 'products.product.product_variants' | t | default: 'Choose an option' }}</label><select id="Variant-{{ section.id }}" name="id" data-variant-select>{% for variant in product.variants %}<option value="{{ variant.id }}" data-available="{{ variant.available }}" data-price="{{ variant.price | money | escape }}" data-image="{% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1200 }}{% endif %}" data-inventory="{{ variant.inventory_quantity }}" data-policy="{{ variant.inventory_policy }}" {% if variant.id == current_variant.id %}selected{% endif %} {% unless variant.available %}disabled{% endunless %}>{{ variant.title | escape }}{% unless variant.available %} — {{ 'products.product.sold_out' | t | default: 'Sold out' }}{% endunless %}</option>{% endfor %}</select>{% else %}<input type="hidden" name="id" value="{{ current_variant.id }}" data-single-variant>{% endunless %}
+          <label for="Quantity-{{ section.id }}">{{ 'products.product.quantity.label' | t | default: 'Quantity' }}</label><input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1" inputmode="numeric">
+          <button type="submit" name="add" data-main-buy {% unless current_variant.available %}disabled{% endunless %}>{{ 'products.product.add_to_cart' | t | default: 'Add to cart' }}</button>
+        {% endform %}
+        <p class="pde__stock" data-stock role="status" {% unless current_variant.inventory_management and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= 5 %}hidden{% endunless %}>{{ section.settings.low_stock_text | replace: '[count]', current_variant.inventory_quantity }}</p>
+        {% for block in section.blocks %}<details class="pde__accordion" {{ block.shopify_attributes }}><summary>{{ block.settings.title | escape }}</summary><div>{% if block.settings.content != blank %}{{ block.settings.content }}{% elsif block.settings.title == 'Description' %}{{ product.description }}{% endif %}</div></details>{% endfor %}
+      </div>
+    </div>
+    <div class="pde__sticky" data-sticky-buy hidden><span>{{ product.title | escape }}</span><span data-sticky-price>{{ current_variant.price | money }}</span><button type="button" data-sticky-add aria-label="Add {{ product.title | escape }} to cart">{{ 'products.product.add_to_cart' | t | default: 'Add to cart' }}</button></div>
+  {% endif %}
+</section>
+{% schema %}
+{"name":"Product enhancements","tag":"section","class":"section-product-enhancements","settings":[{"type":"checkbox","id":"show_image","label":"Show featured image","default":true},{"type":"text","id":"low_stock_text","label":"Low-stock message (use [count])","default":"Only [count] left in stock"}],"blocks":[{"type":"accordion","name":"Accordion","settings":[{"type":"text","id":"title","label":"Heading","default":"Description"},{"type":"richtext","id":"content","label":"Content","default":"<p>Enter details here.</p>"}]}],"max_blocks":3,"presets":[{"name":"Product enhancements","blocks":[{"type":"accordion","settings":{"title":"Description"}},{"type":"accordion","settings":{"title":"Shipping"}},{"type":"accordion","settings":{"title":"Returns"}}]}]}
+{% endschema %}
